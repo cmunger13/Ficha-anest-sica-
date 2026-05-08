@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Ficha Anestésica</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563eb;--blue-light:#eff6ff;--blue-mid:#dbeafe;--blue-dark:#1d4ed8;
+  --green:#16a34a;--green-light:#f0fdf4;--green-mid:#dcfce7;
+  --amber:#d97706;--amber-light:#fffbeb;--amber-mid:#fef3c7;
+  --red:#dc2626;--red-light:#fef2f2;
+  --slate:#0f172a;--slate2:#1e293b;--slate3:#334155;--slate4:#475569;
+  --gray:#64748b;--gray2:#94a3b8;--gray3:#cbd5e1;--gray4:#e2e8f0;--gray5:#f1f5f9;--gray6:#f8fafc;
+  --white:#ffffff;
+  --r:10px;--r-sm:6px;--r-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.05);
+  --font:Inter,system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{font-size:16px;background:var(--gray5)}
+body{font-family:var(--font);color:var(--slate);min-height:100vh;background:var(--gray5);-webkit-font-smoothing:antialiased}
+
+/* ─── CLINIC HEADER ─── */
+.clinic-header{
+  background:var(--white);border-bottom:1px solid var(--gray4);
+  padding:12px 16px;
+}
+.clinic-inner{display:flex;align-items:center;gap:12px;max-width:700px;margin:0 auto}
+.clinic-logo{
+  width:52px;height:52px;border-radius:var(--r-sm);overflow:hidden;
+  border:1.5px solid var(--gray4);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gray5);cursor:pointer;position:relative;
+}
+.clinic-logo img{width:100%;height:100%;object-fit:cover;display:none}
+.clinic-logo .logo-placeholder{font-size:22px;user-select:none}
+.clinic-logo input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.clinic-info{flex:1;min-width:0}
+.clinic-name{font-size:15px;font-weight:700;color:var(--slate);line-height:1.2}
+.clinic-name[contenteditable]{cursor:text;border-bottom:1px dashed var(--gray3)}
+.clinic-name[contenteditable]:focus{outline:none;border-bottom-color:var(--blue)}
+.clinic-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.clinic-sub[contenteditable]{cursor:text;border-bottom:1px dashed var(--gray3)}
+.clinic-sub[contenteditable]:focus{outline:none;border-bottom-color:var(--blue)}
+.clinic-edit-hint{font-size:10px;color:var(--gray2);margin-top:3px;display:flex;align-items:center;gap:4px}
+
+/* ─── APP HEADER ─── */
+.app-header{
+  background:var(--white);border-bottom:1px solid var(--gray4);
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.app-header-inner{
+  max-width:700px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;height:52px;
+}
+.app-title{font-size:15px;font-weight:700;color:var(--slate);display:flex;align-items:center;gap:8px}
+.app-title-icon{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.btn-pdf{
+  background:var(--blue);color:var(--white);border:none;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  padding:0 14px;height:36px;border-radius:var(--r-sm);cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-pdf:active{background:var(--blue-dark)}
+
+/* ─── TABS ─── */
+.tabs-wrap{
+  background:var(--white);border-bottom:1px solid var(--gray4);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;padding:0 12px;min-width:max-content;gap:2px}
+.tab{
+  font-size:12px;font-weight:500;color:var(--gray);
+  padding:12px 14px;border-bottom:2px solid transparent;
+  cursor:pointer;white-space:nowrap;transition:all .15s;
+  display:flex;align-items:center;gap:5px;user-select:none;
+}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.tab-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--gray3);
+  transition:background .15s;flex-shrink:0;
+}
+.tab.done .tab-dot{background:var(--green)}
+.tab.active .tab-dot{background:var(--blue)}
+
+/* ─── MAIN ─── */
+.main{max-width:700px;margin:0 auto;padding:16px 16px 100px}
+.section{display:none}
+.section.active{display:block;animation:fadeup .18s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── CARD ─── */
+.card{
+  background:var(--white);border-radius:var(--r-lg);
+  border:1px solid var(--gray4);box-shadow:var(--shadow);
+  margin-bottom:12px;overflow:hidden;
+}
+.card-header{
+  padding:14px 16px 10px;border-bottom:1px solid var(--gray5);
+  display:flex;align-items:center;gap:8px;
+}
+.card-icon{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.card-icon.blue{background:var(--blue-mid)}
+.card-icon.green{background:var(--green-mid)}
+.card-icon.amber{background:var(--amber-mid)}
+.card-title{font-size:14px;font-weight:700;color:var(--slate)}
+.card-body{padding:14px 16px}
+
+/* ─── FORM ─── */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{
+  display:block;font-size:12px;font-weight:600;
+  color:var(--slate3);margin-bottom:5px;letter-spacing:.01em;
+}
+.field label .req{color:var(--red)}
+.field input,.field select,.field textarea{
+  font-family:var(--font);font-size:16px;
+  background:var(--gray6);border:1.5px solid var(--gray4);
+  border-radius:var(--r-sm);padding:10px 12px;
+  color:var(--slate);width:100%;transition:border-color .15s,background .15s;
+  appearance:none;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--blue);background:var(--white);
+}
+.field textarea{min-height:72px;resize:vertical}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.span2{grid-column:span 2}
+
+/* ─── ASA SELECTOR ─── */
+.asa-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.asa-btn{
+  width:48px;height:48px;border-radius:50%;
+  border:2px solid var(--gray4);background:var(--gray6);
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  color:var(--gray);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.asa-btn.sel{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.asa-btn[data-val="E"].sel{border-color:var(--red);background:var(--red-light);color:var(--red)}
+
+/* ─── DRUG ROWS ─── */
+.drug-cols{
+  display:grid;grid-template-columns:2fr 80px 64px 80px auto;
+  gap:6px;margin-bottom:5px;
+}
+.drug-col-label{font-size:10px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.05em;padding:0 2px}
+.drug-row{display:grid;grid-template-columns:2fr 80px 64px 80px auto;gap:6px;margin-bottom:8px;align-items:end}
+.drug-row input,.drug-row select{
+  font-family:var(--font);font-size:14px;
+  background:var(--gray6);border:1.5px solid var(--gray4);
+  border-radius:var(--r-sm);padding:9px 8px;color:var(--slate);
+  width:100%;appearance:none;min-height:40px;
+}
+.drug-row input:focus,.drug-row select:focus{outline:none;border-color:var(--blue)}
+.btn-rm{
+  width:40px;height:40px;border-radius:var(--r-sm);
+  background:var(--gray5);border:1.5px solid var(--gray4);
+  color:var(--gray);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.btn-rm:active{border-color:var(--red);color:var(--red);background:var(--red-light)}
+.btn-add{
+  width:100%;min-height:40px;border:1.5px dashed var(--gray3);
+  border-radius:var(--r-sm);background:transparent;
+  font-family:var(--font);font-size:13px;font-weight:500;color:var(--gray);
+  cursor:pointer;margin-top:4px;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-add:active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+
+/* ─── INFUSION ROWS (CRI) ─── */
+.cri-row{
+  background:var(--blue-light);border:1.5px solid var(--blue-mid);
+  border-radius:var(--r-sm);padding:10px;margin-bottom:8px;
+}
+.cri-row-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.cri-row-mid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.cri-row-bot{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.cri-row input,.cri-row select{
+  font-family:var(--font);font-size:14px;
+  background:var(--white);border:1.5px solid var(--blue-mid);
+  border-radius:var(--r-sm);padding:8px 10px;color:var(--slate);
+  width:100%;appearance:none;min-height:40px;
+}
+.cri-row input:focus,.cri-row select:focus{outline:none;border-color:var(--blue)}
+.cri-label{font-size:10px;font-weight:600;color:var(--blue-dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.cri-result{
+  background:var(--blue);color:var(--white);
+  border-radius:var(--r-sm);padding:8px 12px;
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  text-align:center;min-height:40px;
+  display:flex;align-items:center;justify-content:center;
+}
+.btn-rm-cri{
+  width:40px;height:40px;border-radius:var(--r-sm);
+  background:rgba(220,38,38,.1);border:1.5px solid rgba(220,38,38,.2);
+  color:var(--red);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  align-self:end;
+}
+
+/* ─── DOSE CALCULATOR ─── */
+.calc-wrap{
+  background:var(--green-light);border:1.5px solid var(--green-mid);
+  border-radius:var(--r);padding:14px;margin-bottom:12px;
+}
+.calc-title{
+  font-size:12px;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.dose-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--green-mid);
+}
+.dose-row:last-child{border-bottom:none}
+.dose-info .dose-name{font-size:13px;font-weight:600;color:var(--slate2)}
+.dose-info .dose-desc{font-size:11px;color:var(--gray);margin-top:1px}
+.dose-val{
+  font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);
+  white-space:nowrap;margin-left:8px;
+}
+
+/* ─── CUSTOM DOSE INPUT ─── */
+.custom-dose-wrap{
+  background:var(--amber-light);border:1.5px solid var(--amber-mid);
+  border-radius:var(--r-sm);padding:12px;margin-bottom:8px;
+}
+.custom-dose-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.custom-dose-grid input,.custom-dose-grid select{
+  font-family:var(--font);font-size:14px;
+  background:var(--white);border:1.5px solid var(--amber-mid);
+  border-radius:var(--r-sm);padding:8px 10px;color:var(--slate);
+  width:100%;appearance:none;min-height:40px;
+}
+.custom-dose-grid input:focus,.custom-dose-grid select:focus{outline:none;border-color:var(--amber)}
+.custom-dose-result{
+  font-family:var(--mono);font-size:13px;font-weight:700;color:var(--white);
+  background:var(--amber);border-radius:var(--r-sm);padding:8px 10px;
+  min-height:40px;display:flex;align-items:center;justify-content:center;
+  white-space:nowrap;
+}
+
+/* ─── MONITORING ─── */
+.mon-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+.mon-table{border-collapse:collapse;min-width:500px;width:100%}
+.mon-table th{
+  background:var(--slate2);color:var(--white);
+  padding:8px 6px;font-size:11px;font-weight:600;text-align:center;
+  font-family:var(--mono);letter-spacing:.03em;
+}
+.mon-table th:first-child{text-align:left;padding-left:10px;min-width:100px;border-radius:6px 0 0 0}
+.mon-table th:last-child{border-radius:0 6px 0 0}
+.mon-table td{border:1px solid var(--gray4)}
+.mon-table td.lbl{
+  background:var(--gray5);padding:6px 10px;
+  font-size:11px;font-weight:600;color:var(--slate3);white-space:nowrap;
+}
+.mon-table td input{
+  width:100%;border:none;background:transparent;text-align:center;
+  padding:7px 4px;font-family:var(--mono);font-size:13px;color:var(--slate);
+  min-height:36px;
+}
+.mon-table td input:focus{outline:none;background:var(--blue-light)}
+.mon-table tr:nth-child(even) td:not(.lbl){background:var(--gray6)}
+.btn-add-col{
+  font-size:12px;font-weight:600;color:var(--blue);
+  background:var(--blue-light);border:1.5px dashed var(--blue);
+  border-radius:var(--r-sm);padding:8px 14px;cursor:pointer;
+  margin-top:8px;width:100%;font-family:var(--font);
+}
+
+/* ─── PILL TOGGLE ─── */
+.pill-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.pill{
+  padding:7px 14px;border-radius:20px;
+  border:1.5px solid var(--gray4);background:var(--gray6);
+  font-size:13px;font-weight:500;color:var(--gray);
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.pill.sel{
+  border-color:var(--blue);background:var(--blue-light);
+  color:var(--blue);font-weight:600;
+}
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--gray4);
+  padding:8px 16px calc(8px + env(safe-area-inset-bottom));
+  z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.06);
+}
+.bottom-nav-inner{
+  max-width:700px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.btn-nav{
+  flex:1;height:44px;border-radius:var(--r-sm);
+  font-family:var(--font);font-size:14px;font-weight:600;
+  border:none;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-prev{background:var(--gray5);color:var(--slate3);border:1.5px solid var(--gray4)}
+.btn-prev:active{background:var(--gray4)}
+.btn-next{background:var(--blue);color:var(--white)}
+.btn-next:active{background:var(--blue-dark)}
+.btn-finish{background:var(--green);color:var(--white)}
+.btn-finish:active{background:#15803d}
+.step-dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gray3);transition:all .2s}
+.dot.active{background:var(--blue);transform:scale(1.2)}
+.dot.done{background:var(--green)}
+
+/* ─── SUMMARY ─── */
+.sum-section{margin-bottom:16px}
+.sum-title{
+  font-size:11px;font-weight:700;color:var(--gray);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--gray4);
+}
+.sum-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;padding:6px 0;border-bottom:1px solid var(--gray5);font-size:13px;
+}
+.sum-row:last-child{border-bottom:none}
+.sum-label{color:var(--gray);font-size:12px;flex-shrink:0}
+.sum-val{font-weight:600;color:var(--slate2);text-align:right}
+
+/* ─── MODAL PDF ─── */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:var(--white);border-radius:20px 20px 0 0;
+  padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+  width:100%;max-width:500px;margin:0 auto;
+  animation:slideup .2s ease;
+}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--gray);margin-bottom:14px;line-height:1.6}
+.modal-step{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:10px 0;border-bottom:1px solid var(--gray5);
+}
+.modal-step:last-of-type{border-bottom:none}
+.modal-step-num{
+  width:24px;height:24px;border-radius:50%;background:var(--blue);
+  color:var(--white);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.modal-step-txt{font-size:13px;color:var(--slate2);line-height:1.5}
+.modal-step-txt strong{font-weight:700}
+.modal-close{
+  width:100%;height:46px;border-radius:var(--r-sm);
+  background:var(--slate);color:var(--white);
+  border:none;font-family:var(--font);font-size:15px;font-weight:600;
+  cursor:pointer;margin-top:16px;
+}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--slate2);color:var(--white);
+  padding:10px 18px;border-radius:20px;
+  font-size:13px;font-weight:500;
+  opacity:0;transition:all .25s;z-index:999;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ─── DIVIDER ─── */
+.divider{height:1px;background:var(--gray4);margin:14px 0}
+.hint{font-size:11px;color:var(--gray2);margin-top:3px}
+
+@media print{
+  .app-header,.tabs-wrap,.bottom-nav,.modal-bg,.clinic-edit-hint,.btn-pdf{display:none!important}
+  .section{display:block!important}
+  .clinic-header{border-bottom:2px solid #000}
+  body{background:#fff}
+  .main{padding:12px;max-width:100%}
+  .card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ CLINIC HEADER ══ -->
+<div class="clinic-header" id="clinicHeader">
+  <div class="clinic-inner">
+    <div class="clinic-logo" id="logoWrap" title="Toque para adicionar logo">
+      <span class="logo-placeholder">🏥</span>
+      <img id="logoImg" alt="Logo da clínica">
+      <input type="file" accept="image/*" onchange="loadLogo(this)">
+    </div>
+    <div class="clinic-info">
+      <div class="clinic-name" contenteditable="true" id="clinicName" data-ph="Nome da Clínica">Nome da Clínica</div>
+      <div class="clinic-sub" contenteditable="true" id="clinicSub" data-ph="Endereço · Telefone · CRMV">Endereço · Telefone · CRMV</div>
+      <div class="clinic-edit-hint">✏️ Toque para editar</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP HEADER ══ -->
+<div class="app-header">
+  <div class="app-header-inner">
+    <div class="app-title">
+      <div class="app-title-icon">🩺</div>
+      Ficha Anestésica
+    </div>
+    <button class="btn-pdf" onclick="showPDFModal()">⬇ PDF</button>
+  </div>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabsBar">
+    <div class="tab active" onclick="goTo(0)"><span class="tab-dot"></span>Identificação</div>
+    <div class="tab" onclick="goTo(1)"><span class="tab-dot"></span>Avaliação Pré</div>
+    <div class="tab" onclick="goTo(2)"><span class="tab-dot"></span>Protocolo</div>
+    <div class="tab" onclick="goTo(3)"><span class="tab-dot"></span>Intraop.</div>
+    <div class="tab" onclick="goTo(4)"><span class="tab-dot"></span>Recuperação</div>
+    <div class="tab" onclick="goTo(5)"><span class="tab-dot"></span>Resumo</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════
+     SEÇÃO 1 — IDENTIFICAÇÃO
+══════════════════════════════════ -->
+<div class="section active" id="sec-0">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">🐾</div>
+      <div class="card-title">Dados do Paciente</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field span2">
+          <label>Nome do Paciente <span class="req">*</span></label>
+          <input type="text" id="nome" placeholder="Ex: Thor" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Espécie <span class="req">*</span></label>
+          <select id="especie">
+            <option value="">—</option>
+            <option>Canino</option><option>Felino</option>
+            <option>Equino</option><option>Bovino</option>
+            <option>Coelho</option><option>Ave</option><option>Réptil</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Raça</label>
+          <input type="text" id="raca" placeholder="Ex: SRD, Labrador">
+        </div>
+        <div class="field">
+          <label>Sexo</label>
+          <select id="sexo">
+            <option value="">—</option>
+            <option>Macho inteiro</option><option>Macho castrado</option>
+            <option>Fêmea inteira</option><option>Fêmea castrada</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Idade</label>
+          <input type="text" id="idade" placeholder="Ex: 3 anos">
+        </div>
+        <div class="field">
+          <label>Peso (kg) <span class="req">*</span></label>
+          <input type="number" id="peso" step="0.1" min="0" placeholder="0.0" inputmode="decimal" oninput="calcAll()">
+        </div>
+        <div class="field">
+          <label>Temperamento</label>
+          <select id="temperamento">
+            <option value="">—</option>
+            <option>Dócil</option><option>Moderado</option>
+            <option>Agressivo</option><option>Assustado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">📋</div>
+      <div class="card-title">Dados do Procedimento</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Procedimento / Cirurgia</label>
+        <input type="text" id="procedimento" placeholder="Ex: OSH, orquiectomia, laparotomia...">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Data <span class="req">*</span></label>
+          <input type="date" id="data">
+        </div>
+        <div class="field">
+          <label>Horário</label>
+          <input type="time" id="horario">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>Tutor / Responsável</label>
+        <input type="text" id="tutor" placeholder="Nome completo">
+      </div>
+      <div class="field">
+        <label>Telefone</label>
+        <input type="tel" id="telefone" placeholder="(00) 00000-0000" inputmode="tel">
+      </div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <div class="field">
+          <label>Anestesista <span class="req">*</span></label>
+          <input type="text" id="anestesista" placeholder="Nome do anestesista">
+        </div>
+        <div class="field">
+          <label>Cirurgião</label>
+          <input type="text" id="cirurgiao" placeholder="Nome do cirurgião">
+        </div>
+        <div class="field">
+          <label>Auxiliar / Instrumentador</label>
+          <input type="text" id="auxiliar" placeholder="Nome do auxiliar">
+        </div>
+        <div class="field">
+          <label>Local de Atendimento</label>
+          <input type="text" id="local" placeholder="Ex: Centro Cirúrgico 1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div style="flex:0.3"></div>
+      <div class="step-dots" id="dots"></div>
+      <button class="btn-nav btn-next" onclick="goTo(1)">Avaliação Pré →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEÇÃO 2 — AVALIAÇÃO PRÉ
+══════════════════════════════════ -->
+<div class="section" id="sec-1">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">⚠️</div>
+      <div class="card-title">Classificação ASA</div>
+    </div>
+    <div class="card-body">
+      <div class="asa-grid" id="asaGrid">
+        <div class="asa-btn" data-val="ASA I" onclick="selASA(this)">I</div>
+        <div class="asa-btn" data-val="ASA II" onclick="selASA(this)">II</div>
+        <div class="asa-btn" data-val="ASA III" onclick="selASA(this)">III</div>
+        <div class="asa-btn" data-val="ASA IV" onclick="selASA(this)">IV</div>
+        <div class="asa-btn" data-val="ASA V" onclick="selASA(this)">V</div>
+        <div class="asa-btn" data-val="E" onclick="selASA(this)">E</div>
+      </div>
+      <input type="hidden" id="asa" value="">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">📊</div>
+      <div class="card-title">Parâmetros Basais</div>
+    </div>
+    <div class="card-body">
+      <div class="grid3">
+        <div class="field">
+          <label>FC (bpm)</label>
+          <input type="number" id="fc_basal" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>FR (mpm)</label>
+          <input type="number" id="fr_basal" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Temp. (°C)</label>
+          <input type="number" id="temp_basal" step="0.1" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>SpO₂ (%)</label>
+          <input type="number" id="spo2_basal" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>TPC (s)</label>
+          <input type="number" id="tpc_basal" step="0.5" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>PAS (mmHg)</label>
+          <input type="number" id="pas_basal" placeholder="—" inputmode="numeric">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Mucosas</label>
+          <select id="mucosas">
+            <option value="">—</option>
+            <option>Róseas e úmidas</option><option>Pálidas</option>
+            <option>Cianóticas</option><option>Ictéricas</option><option>Congestas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Hidratação</label>
+          <select id="hidratacao">
+            <option value="">—</option>
+            <option>Normal (&lt;5%)</option><option>Leve (~5%)</option>
+            <option>Moderada (~8%)</option><option>Grave (≥10%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">🍽️</div>
+      <div class="card-title">Jejum</div>
+    </div>
+    <div class="card-body">
+      <div class="grid3">
+        <div class="field">
+          <label>Jejum sólido (h)</label>
+          <input type="number" id="jej_sol" step="0.5" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Jejum hídrico (h)</label>
+          <input type="number" id="jej_hid" step="0.5" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Adequado?</label>
+          <select id="jej_ok">
+            <option value="">—</option><option>Sim</option><option>Não</option><option>Emergência</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">📁</div>
+      <div class="card-title">Histórico e Comorbidades</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Histórico / comorbidades</label>
+        <textarea id="historico" placeholder="MCH, HAS, DRC, epilepsia, hepatopatia..."></textarea>
+      </div>
+      <div class="field">
+        <label>Medicações em uso</label>
+        <textarea id="medicacoes" placeholder="Atenolol, furosemida, clopidogrel..."></textarea>
+      </div>
+      <div class="field">
+        <label>Exames complementares</label>
+        <textarea id="exames" placeholder="Hemograma, bioquímico, ECG, ecocardiograma..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn-nav btn-prev" onclick="goTo(0)">← Voltar</button>
+      <div class="step-dots" id="dots1"></div>
+      <button class="btn-nav btn-next" onclick="goTo(2)">Protocolo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEÇÃO 3 — PROTOCOLO
+══════════════════════════════════ -->
+<div class="section" id="sec-2">
+
+  <!-- CALCULADORA FIXA -->
+  <div class="calc-wrap">
+    <div class="calc-title">⚡ Calculadora — Peso: <span id="pesoDisplay" style="color:var(--slate2)">—</span> kg</div>
+    <div id="calcDoses"></div>
+  </div>
+
+  <!-- DOSE PERSONALIZADA -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">🧮</div>
+      <div class="card-title">Calcular Dose Personalizada</div>
+    </div>
+    <div class="card-body">
+      <div id="customDoseList"></div>
+      <button class="btn-add" onclick="addCustomDose()">+ Nova dose personalizada</button>
+    </div>
+  </div>
+
+  <!-- MPA -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">💉</div>
+      <div class="card-title">MPA — Medicação Pré-Anestésica</div>
+    </div>
+    <div class="card-body">
+      <div class="drug-cols">
+        <span class="drug-col-label">Fármaco</span>
+        <span class="drug-col-label">Dose</span>
+        <span class="drug-col-label">Vol (mL)</span>
+        <span class="drug-col-label">Via</span>
+        <span></span>
+      </div>
+      <div id="mpa-list"></div>
+      <button class="btn-add" onclick="addDrug('mpa')">+ Fármaco MPA</button>
+    </div>
+  </div>
+
+  <!-- INDUÇÃO -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">🔬</div>
+      <div class="card-title">Indução Anestésica</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Técnica</label>
+          <select id="tec_ind">
+            <option value="">—</option>
+            <option>IV</option><option>Inalatória (máscara)</option>
+            <option>IM</option><option>Câmara</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Horário indução</label>
+          <input type="time" id="hora_ind">
+        </div>
+        <div class="field">
+          <label>Intubação OT</label>
+          <select id="intubacao">
+            <option value="">—</option><option>Sim</option>
+            <option>Não</option><option>Máscara laríngea</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nº Tubo (mm)</label>
+          <input type="text" id="tubo" placeholder="5,0">
+        </div>
+        <div class="field">
+          <label>Cuff</label>
+          <select id="cuff">
+            <option value="">—</option><option>Insuflado</option>
+            <option>Não insuflado</option><option>Sem cuff</option>
+          </select>
+        </div>
+      </div>
+      <div class="drug-cols" style="margin-top:8px">
+        <span class="drug-col-label">Fármaco</span>
+        <span class="drug-col-label">Dose</span>
+        <span class="drug-col-label">Vol (mL)</span>
+        <span class="drug-col-label">Via</span>
+        <span></span>
+      </div>
+      <div id="ind-list"></div>
+      <button class="btn-add" onclick="addDrug('ind')">+ Fármaco indução</button>
+    </div>
+  </div>
+
+  <!-- MANUTENÇÃO -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">🌀</div>
+      <div class="card-title">Manutenção Anestésica</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Agente</label>
+          <select id="manut_ag">
+            <option value="">—</option>
+            <option>Isoflurano</option><option>Sevoflurano</option>
+            <option>TIVA (Propofol)</option><option>TIVA (Ceta/Prop)</option>
+            <option>PIVA</option><option>Alfa-2 + Opioide IM</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Circuito</label>
+          <select id="circuito">
+            <option value="">—</option>
+            <option>Semifechado</option><option>Fechado</option>
+            <option>Mapleson D</option><option>Mapleson F</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fluxo O₂ (L/min)</label>
+          <input type="number" id="fluxo_o2" step="0.1" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>ET% início</label>
+          <input type="number" id="et_ini" step="0.1" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Ventilação</label>
+          <select id="ventilacao">
+            <option value="">—</option>
+            <option>Espontânea</option><option>Controlada manual</option>
+            <option>Controlada ventilador</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Acesso venoso</label>
+          <input type="text" id="acesso" placeholder="Cefálica D, 22G">
+        </div>
+      </div>
+      <div class="drug-cols" style="margin-top:8px">
+        <span class="drug-col-label">Fármaco (infusão/bolus)</span>
+        <span class="drug-col-label">Dose/taxa</span>
+        <span class="drug-col-label">Vol (mL)</span>
+        <span class="drug-col-label">Via</span>
+        <span></span>
+      </div>
+      <div id="manut-list"></div>
+      <button class="btn-add" onclick="addDrug('manut')">+ Fármaco manutenção</button>
+    </div>
+  </div>
+
+  <!-- INFUSÕES CONTÍNUAS (CRI) -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">🔄</div>
+      <div class="card-title">Infusões Contínuas (CRI / TCI)</div>
+    </div>
+    <div class="card-body">
+      <div id="cri-list"></div>
+      <button class="btn-add" onclick="addCRI()" style="border-color:var(--blue);color:var(--blue)">+ Adicionar infusão contínua</button>
+    </div>
+  </div>
+
+  <!-- FLUIDOTERAPIA -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">💧</div>
+      <div class="card-title">Fluidoterapia</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Solução</label>
+          <select id="fluido_sol">
+            <option value="">—</option>
+            <option>Ringer Lactato</option><option>NaCl 0,9%</option>
+            <option>NaCl 0,45%</option><option>Plasma-Lyte</option>
+            <option>Glicose 5%</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Taxa (mL/kg/h)</label>
+          <input type="number" id="fluido_taxa" step="0.5" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Volume total (mL)</label>
+          <input type="number" id="fluido_vol" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Aquecimento?</label>
+          <select id="fluido_aq">
+            <option value="">—</option><option>Sim</option><option>Não</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn-nav btn-prev" onclick="goTo(1)">← Voltar</button>
+      <div class="step-dots" id="dots2"></div>
+      <button class="btn-nav btn-next" onclick="goTo(3)">Intraop. →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEÇÃO 4 — INTRAOPERATÓRIO
+══════════════════════════════════ -->
+<div class="section" id="sec-3">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">⏱️</div>
+      <div class="card-title">Horários</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Início anestesia</label>
+          <input type="time" id="hora_inicio">
+        </div>
+        <div class="field">
+          <label>Início cirurgia</label>
+          <input type="time" id="hora_cx">
+        </div>
+        <div class="field">
+          <label>Término cirurgia</label>
+          <input type="time" id="hora_cx_fim">
+        </div>
+        <div class="field">
+          <label>Término anestesia</label>
+          <input type="time" id="hora_fim">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">📈</div>
+      <div class="card-title">Monitoração Intraoperatória</div>
+    </div>
+    <div class="card-body">
+      <div class="mon-scroll">
+        <table class="mon-table" id="mon-table"></table>
+      </div>
+      <button class="btn-add-col" onclick="addMonCol()">+ Intervalo de tempo</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">⚡</div>
+      <div class="card-title">Intercorrências</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="intercorrencias" rows="4" placeholder="Ex: Bradicardia às 09h32 (FC 42 bpm) — tratada com atropina 0,04 mg/kg IV..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">🎯</div>
+      <div class="card-title">Bloqueios / Loco-regional</div>
+    </div>
+    <div class="card-body">
+      <div class="drug-cols">
+        <span class="drug-col-label">Técnica</span>
+        <span class="drug-col-label">Anestésico</span>
+        <span class="drug-col-label">Vol (mL)</span>
+        <span class="drug-col-label">Conc.</span>
+        <span></span>
+      </div>
+      <div id="bloq-list"></div>
+      <button class="btn-add" onclick="addDrug('bloq')">+ Adicionar bloqueio</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn-nav btn-prev" onclick="goTo(2)">← Voltar</button>
+      <div class="step-dots" id="dots3"></div>
+      <button class="btn-nav btn-next" onclick="goTo(4)">Recuperação →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEÇÃO 5 — RECUPERAÇÃO
+══════════════════════════════════ -->
+<div class="section" id="sec-4">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">❤️</div>
+      <div class="card-title">Parâmetros de Extubação</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Horário extubação</label>
+          <input type="time" id="hora_extub">
+        </div>
+        <div class="field">
+          <label>Temp. (°C)</label>
+          <input type="number" id="temp_rec" step="0.1" placeholder="—" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>FC (bpm)</label>
+          <input type="number" id="fc_rec" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>SpO₂ (%)</label>
+          <input type="number" id="spo2_rec" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Reflexo deglutição</label>
+          <select id="refl_deg">
+            <option value="">—</option><option>Presente</option><option>Ausente</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Decúbito esternal</label>
+          <select id="decubito">
+            <option value="">—</option><option>Sim</option><option>Não</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Aquecimento ativo</label>
+          <select id="aq_rec">
+            <option value="">—</option><option>Sim</option><option>Não</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Qualidade recuperação</label>
+          <select id="qual_rec">
+            <option value="">—</option>
+            <option>Excelente</option><option>Boa</option>
+            <option>Regular</option><option>Agitada</option><option>Prolongada</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">😣</div>
+      <div class="card-title">Avaliação de Dor</div>
+    </div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Escala utilizada</label>
+          <select id="escala_dor">
+            <option value="">—</option>
+            <option>NRS (0–10)</option><option>Glasgow (SDS)</option>
+            <option>UNESP-Botucatu felina</option>
+            <option>Colorado</option><option>Feline Grimace Scale</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Escore T0</label>
+          <input type="number" id="escore_t0" min="0" max="24" placeholder="—" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Escore T1h</label>
+          <input type="number" id="escore_t1" min="0" max="24" placeholder="—" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">💊</div>
+      <div class="card-title">Prescrição Pós-operatória</div>
+    </div>
+    <div class="card-body">
+      <div class="drug-cols">
+        <span class="drug-col-label">Fármaco</span>
+        <span class="drug-col-label">Dose</span>
+        <span class="drug-col-label">Freq.</span>
+        <span class="drug-col-label">Via</span>
+        <span></span>
+      </div>
+      <div id="posop-list"></div>
+      <button class="btn-add" onclick="addDrug('posop')">+ Analgésico pós-op</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">📝</div>
+      <div class="card-title">Observações / Alta</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="observacoes" rows="4" placeholder="Manter aquecimento por 2h; verificar dor a cada hora; retorno se vômito..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn-nav btn-prev" onclick="goTo(3)">← Voltar</button>
+      <div class="step-dots" id="dots4"></div>
+      <button class="btn-nav btn-finish" onclick="goTo(5)">Gerar Resumo ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEÇÃO 6 — RESUMO
+══════════════════════════════════ -->
+<div class="section" id="sec-5">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">📄</div>
+      <div class="card-title">Resumo da Ficha</div>
+    </div>
+    <div class="card-body" id="summaryContent"></div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:12px">
+    <button class="btn-nav btn-prev" style="flex:1;height:44px" onclick="goTo(0)">← Editar</button>
+    <button class="btn-nav btn-finish" style="flex:1;height:44px" onclick="showPDFModal()">⬇ Salvar PDF</button>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="btn-nav btn-prev" onclick="goTo(4)">← Voltar</button>
+      <div class="step-dots" id="dots5"></div>
+      <div style="flex:1"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ══ PDF MODAL ══ -->
+<div class="modal-bg" id="pdfModal">
+  <div class="modal">
+    <h2>📄 Salvar como PDF</h2>
+    <p>No iPhone, siga esses passos:</p>
+    <div class="modal-step">
+      <div class="modal-step-num">1</div>
+      <div class="modal-step-txt">Toque no ícone <strong>Compartilhar ↑</strong> na barra inferior do Safari</div>
+    </div>
+    <div class="modal-step">
+      <div class="modal-step-num">2</div>
+      <div class="modal-step-txt">Role e toque em <strong>"Imprimir"</strong></div>
+    </div>
+    <div class="modal-step">
+      <div class="modal-step-num">3</div>
+      <div class="modal-step-txt">Na prévia, faça um gesto de <strong>pinça para ampliar</strong> — converte em PDF automaticamente</div>
+    </div>
+    <div class="modal-step">
+      <div class="modal-step-num">4</div>
+      <div class="modal-step-txt">Toque em <strong>Compartilhar</strong> → salve em Arquivos, envie por WhatsApp ou e-mail</div>
+    </div>
+    <button class="modal-close" onclick="closePDF()">Entendido</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── GLOBALS ──
+let curStep = 0;
+let monCols = 5;
+const TOTAL_STEPS = 6;
+const MON_ROWS = ['FC (bpm)','FR (mpm)','SpO₂ (%)','ET Isof/Sevo (%)','Temp. (°C)','PAM (mmHg)','PAS (mmHg)','PETCO₂ (mmHg)','Profundidade'];
+
+// ── NAVIGATION ──
+function goTo(s) {
+  document.querySelectorAll('.section').forEach((el,i) => el.classList.toggle('active', i===s));
+  document.querySelectorAll('.tab').forEach((el,i) => {
+    el.classList.remove('active','done');
+    if(i===s) el.classList.add('active');
+    else if(i<s) el.classList.add('done');
+  });
+  curStep = s;
+  renderDots();
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(s===5) buildSummary();
+  if(s===2) calcAll();
+}
+
+function renderDots() {
+  ['dots','dots1','dots2','dots3','dots4','dots5'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = Array.from({length:TOTAL_STEPS}, (_,i) => {
+      let cls = 'dot';
+      if(i===curStep) cls+=' active';
+      else if(i<curStep) cls+=' done';
+      return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+    }).join('');
+  });
+}
+
+// ── LOGO ──
+function loadLogo(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('logoImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.querySelector('.logo-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── ASA ──
+function selASA(btn) {
+  document.querySelectorAll('.asa-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('asa').value = btn.dataset.val;
+}
+
+// ── DOSE CALCULATOR (corrigido) ──
+// Doses fixas de referência
+const FIXED_DOSES = [
+  { name:'Morfina IV', desc:'0,3 mg/kg · sol. 10 mg/mL', calc: p => (p*0.3)/10, unit:'mL' },
+  { name:'Metadona IV', desc:'0,3 mg/kg · sol. 10 mg/mL', calc: p => (p*0.3)/10, unit:'mL' },
+  { name:'Medetomidina', desc:'20 µg/kg · sol. 1 mg/mL', calc: p => (p*0.02)/1, unit:'mL' },
+  { name:'Dexmedetomidina', desc:'5 µg/kg · sol. 0,5 mg/mL', calc: p => (p*0.005)/0.5, unit:'mL' },
+  { name:'Propofol IV', desc:'4 mg/kg · sol. 10 mg/mL', calc: p => (p*4)/10, unit:'mL' },
+  { name:'Cetamina', desc:'5 mg/kg · sol. 100 mg/mL', calc: p => (p*5)/100, unit:'mL' },
+  { name:'Fentanil IV', desc:'5 µg/kg · sol. 50 µg/mL', calc: p => (p*0.005)/0.05, unit:'mL' },
+  { name:'Midazolam', desc:'0,3 mg/kg · sol. 5 mg/mL', calc: p => (p*0.3)/5, unit:'mL' },
+  { name:'Diazepam', desc:'0,3 mg/kg · sol. 5 mg/mL', calc: p => (p*0.3)/5, unit:'mL' },
+  { name:'Atropina', desc:'0,044 mg/kg · sol. 0,25 mg/mL', calc: p => (p*0.044)/0.25, unit:'mL' },
+  { name:'Fluido manutenção', desc:'10 mL/kg/h', calc: p => p*10, unit:'mL/h' },
+];
+
+function calcAll() {
+  const p = parseFloat(document.getElementById('peso').value)||0;
+  document.getElementById('pesoDisplay').textContent = p||'—';
+
+  const wrap = document.getElementById('calcDoses');
+  wrap.innerHTML = FIXED_DOSES.map(d => {
+    const v = p ? d.calc(p).toFixed(2)+' '+d.unit : '—';
+    return `<div class="dose-row">
+      <div class="dose-info">
+        <div class="dose-name">${d.name}</div>
+        <div class="dose-desc">${d.desc}</div>
+      </div>
+      <div class="dose-val">${v}</div>
+    </div>`;
+  }).join('');
+
+  // Recalcular doses personalizadas
+  recalcCustomDoses(p);
+  // Recalcular CRIs
+  recalcCRIs(p);
+}
+
+// ── DOSE PERSONALIZADA (com correção mg/mcg) ──
+function addCustomDose() {
+  const list = document.getElementById('customDoseList');
+  const id = Date.now();
+  const div = document.createElement('div');
+  div.className = 'custom-dose-wrap';
+  div.id = 'cd-'+id;
+  div.innerHTML = `
+    <div class="custom-dose-grid">
+      <div>
+        <div class="cri-label">Fármaco</div>
+        <input type="text" placeholder="Nome do fármaco" oninput="recalcCD('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Dose</div>
+        <input type="number" step="any" placeholder="0" inputmode="decimal" oninput="recalcCD('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Unidade</div>
+        <select onchange="recalcCD('${id}')">
+          <option value="mg_kg">mg/kg</option>
+          <option value="mcg_kg">µg/kg</option>
+          <option value="mg_kg_h">mg/kg/h</option>
+          <option value="mcg_kg_h">µg/kg/h</option>
+          <option value="mg_kg_min">mg/kg/min</option>
+          <option value="mcg_kg_min">µg/kg/min</option>
+        </select>
+      </div>
+      <div>
+        <div class="cri-label">Conc. sol. (mg/mL)</div>
+        <input type="number" step="any" placeholder="10" inputmode="decimal" oninput="recalcCD('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Resultado</div>
+        <div class="custom-dose-result" id="cd-result-${id}">—</div>
+      </div>
+    </div>
+    <div style="margin-top:6px;display:flex;justify-content:flex-end">
+      <button class="btn-rm" onclick="document.getElementById('cd-${id}').remove()" style="width:auto;padding:0 12px;font-size:13px">Remover</button>
+    </div>`;
+  list.appendChild(div);
+}
+
+function recalcCD(id) {
+  const el = document.getElementById('cd-'+id);
+  if(!el) return;
+  const inputs = el.querySelectorAll('input[type=number]');
+  const unitSel = el.querySelector('select');
+  const dose = parseFloat(inputs[0].value)||0;
+  const conc = parseFloat(inputs[1].value)||0;
+  const unit = unitSel.value;
+  const p = parseFloat(document.getElementById('peso').value)||0;
+  const result = document.getElementById('cd-result-'+id);
+  if(!dose||!conc||!p){ result.textContent='—'; return; }
+
+  // Converter para mg se a unidade for µg (1 µg = 0,001 mg)
+  const isMcg = unit.startsWith('mcg');
+  const doseInMg = isMcg ? dose * 0.001 : dose;
+
+  const isPerH = unit.endsWith('_h');
+  const isPerMin = unit.endsWith('_min');
+
+  const totalMg = doseInMg * p; // mg total (ou mg/h ou mg/min)
+  const vol = totalMg / conc;  // mL
+
+  if(isPerH) result.textContent = vol.toFixed(3)+' mL/h';
+  else if(isPerMin) result.textContent = vol.toFixed(3)+' mL/min';
+  else result.textContent = vol.toFixed(3)+' mL';
+}
+
+function recalcCustomDoses(p) {
+  document.querySelectorAll('[id^="cd-"]:not([id^="cd-result"])').forEach(el => {
+    const id = el.id.replace('cd-','');
+    if(id && !isNaN(id)) recalcCD(id);
+  });
+}
+
+// ── CRI / INFUSÕES CONTÍNUAS ──
+function addCRI() {
+  const list = document.getElementById('cri-list');
+  const id = Date.now();
+  const div = document.createElement('div');
+  div.className = 'cri-row';
+  div.id = 'cri-'+id;
+  div.innerHTML = `
+    <div class="cri-row-top">
+      <div>
+        <div class="cri-label">Fármaco</div>
+        <input type="text" placeholder="Ex: Fentanil, Lidocaína..." oninput="recalcCRI('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Dose alvo</div>
+        <input type="number" step="any" placeholder="0" inputmode="decimal" oninput="recalcCRI('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Unidade</div>
+        <select onchange="recalcCRI('${id}')">
+          <option value="mcg_kg_min">µg/kg/min</option>
+          <option value="mcg_kg_h">µg/kg/h</option>
+          <option value="mg_kg_h">mg/kg/h</option>
+          <option value="mg_kg_min">mg/kg/min</option>
+        </select>
+      </div>
+    </div>
+    <div class="cri-row-mid">
+      <div>
+        <div class="cri-label">Conc. sol. (mg/mL)</div>
+        <input type="number" step="any" placeholder="Ex: 0,05" inputmode="decimal" oninput="recalcCRI('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Vol seringa (mL)</div>
+        <input type="number" placeholder="50" inputmode="decimal" oninput="recalcCRI('${id}')">
+      </div>
+      <div>
+        <div class="cri-label">Horário início</div>
+        <input type="time">
+      </div>
+    </div>
+    <div class="cri-row-bot">
+      <div>
+        <div class="cri-label">Taxa calculada</div>
+        <div class="cri-result" id="cri-result-${id}">—</div>
+      </div>
+      <button class="btn-rm-cri" onclick="document.getElementById('cri-${id}').remove()">×</button>
+    </div>
+    <div style="margin-top:8px">
+      <div class="cri-label">Anotações / ajustes de taxa</div>
+      <textarea style="width:100%;font-family:var(--font);font-size:13px;background:var(--white);border:1.5px solid var(--blue-mid);border-radius:6px;padding:8px 10px;min-height:56px;resize:vertical;color:var(--slate)" placeholder="Ex: 09h32 — aumentado para 10 µg/kg/h; 10h15 — reduzido..."></textarea>
+    </div>`;
+  list.appendChild(div);
+}
+
+function recalcCRI(id) {
+  const el = document.getElementById('cri-'+id);
+  if(!el) return;
+  const inputs = el.querySelectorAll('input[type=number]');
+  const unitSel = el.querySelector('select');
+  const dose = parseFloat(inputs[0].value)||0;
+  const conc = parseFloat(inputs[1].value)||0;
+  const unit = unitSel.value;
+  const p = parseFloat(document.getElementById('peso').value)||0;
+  const result = document.getElementById('cri-result-'+id);
+  if(!dose||!conc||!p){ result.textContent='—'; return; }
+
+  // Converter µg para mg
+  const isMcg = unit.startsWith('mcg');
+  const doseInMg = isMcg ? dose * 0.001 : dose;
+
+  const isPerMin = unit.endsWith('_min');
+
+  // mg/kg/h ou mg/kg/min × peso = mg/h ou mg/min
+  let mgPerUnit = doseInMg * p;
+  // converter para mL/h
+  let mlPerH = isPerMin ? (mgPerUnit * 60) / conc : mgPerUnit / conc;
+
+  result.textContent = mlPerH.toFixed(2)+' mL/h';
+}
+
+function recalcCRIs(p) {
+  document.querySelectorAll('[id^="cri-"]:not([id^="cri-result"])').forEach(el => {
+    const id = el.id.replace('cri-','');
+    if(id && !isNaN(id)) recalcCRI(id);
+  });
+}
+
+// ── DRUG ROWS ──
+function addDrug(listId) {
+  const list = document.getElementById(listId+'-list');
+  const row = document.createElement('div');
+  row.className = 'drug-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Fármaco">
+    <input type="text" placeholder="—" inputmode="decimal">
+    <input type="text" placeholder="—" inputmode="decimal">
+    <select><option value="">Via</option>
+      <option>IV</option><option>IM</option><option>SC</option>
+      <option>EV cont.</option><option>Epidural</option><option>Inalatória</option>
+    </select>
+    <button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+  list.appendChild(row);
+}
+
+// ── MONITORING TABLE ──
+function buildMonTable() {
+  const t = document.getElementById('mon-table');
+  let html = '<thead><tr><th>Parâmetro</th>';
+  for(let c=0;c<monCols;c++) html += `<th><input type="time" style="background:transparent;border:none;color:inherit;width:100%;text-align:center;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 0;min-height:auto;"></th>`;
+  html += '</tr></thead><tbody>';
+  MON_ROWS.forEach(r => {
+    html += `<tr><td class="lbl">${r}</td>`;
+    for(let c=0;c<monCols;c++) html += `<td><input type="text" inputmode="decimal"></td>`;
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  t.innerHTML = html;
+}
+function addMonCol() { monCols++; buildMonTable(); }
+
+// ── SUMMARY ──
+function v(id) { const el=document.getElementById(id); return el?(el.value.trim()||'—'):'—'; }
+
+function buildSummary() {
+  const R = (l,val) => `<div class="sum-row"><span class="sum-label">${l}</span><span class="sum-val">${val}</span></div>`;
+  const S = (title, rows) => `<div class="sum-section"><div class="sum-title">${title}</div>${rows}</div>`;
+  document.getElementById('summaryContent').innerHTML =
+    S('Identificação',
+      R('Paciente', v('nome')) +
+      R('Espécie / Raça', v('especie')+' / '+v('raca')) +
+      R('Peso', v('peso')+' kg') + R('Sexo', v('sexo')) +
+      R('Procedimento', v('procedimento')) + R('Data', v('data')) +
+      R('Local', v('local')) + R('Anestesista', v('anestesista')) +
+      R('Cirurgião', v('cirurgiao')) + R('Auxiliar', v('auxiliar'))) +
+    S('Avaliação Pré',
+      R('ASA', v('asa')) + R('FC basal', v('fc_basal')+' bpm') +
+      R('Temp. basal', v('temp_basal')+' °C') + R('SpO₂ basal', v('spo2_basal')+' %') +
+      R('Mucosas', v('mucosas')) + R('Hidratação', v('hidratacao')) +
+      R('Jejum sólido', v('jej_sol')+' h') + R('Jejum hídrico', v('jej_hid')+' h')) +
+    S('Protocolo',
+      R('Indução', v('tec_ind')) + R('Hora indução', v('hora_ind')) +
+      R('Tubo ET', v('tubo')+' mm') + R('Manutenção', v('manut_ag')) +
+      R('Circuito', v('circuito')) + R('Ventilação', v('ventilacao')) +
+      R('Fluido', v('fluido_sol')+' — '+v('fluido_taxa')+' mL/kg/h')) +
+    S('Intraoperatório',
+      R('Início anestesia', v('hora_inicio')) + R('Início cirurgia', v('hora_cx')) +
+      R('Término cirurgia', v('hora_cx_fim')) + R('Término anestesia', v('hora_fim')) +
+      R('Intercorrências', v('intercorrencias'))) +
+    S('Recuperação',
+      R('Extubação', v('hora_extub')) + R('Temp. recup.', v('temp_rec')+' °C') +
+      R('Qualidade', v('qual_rec')) + R('Escala dor', v('escala_dor')) +
+      R('Escore T0', v('escore_t0')) + R('Observações', v('observacoes')));
+}
+
+// ── PDF MODAL ──
+function showPDFModal() { buildSummary(); document.getElementById('pdfModal').classList.add('show'); }
+function closePDF() { document.getElementById('pdfModal').classList.remove('show'); }
+document.getElementById('pdfModal').addEventListener('click', function(e){ if(e.target===this) closePDF(); });
+
+// ── TOAST ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── INIT ──
+function init() {
+  buildMonTable();
+  calcAll();
+  renderDots();
+  addDrug('mpa'); addDrug('ind'); addDrug('manut'); addDrug('posop');
+  document.getElementById('data').value = new Date().toISOString().split('T')[0];
+}
+
+init();
+</script>
+</body>
+</html>
